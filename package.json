@@ -1,0 +1,13 @@
+{
+    "name": "com.alexander.logging-system",
+    "version": "1.0.0",
+    "description": "A system that logs and saves user defined data.",
+    "displayName": "Logging System",
+    "unity": "2020.3",
+    "dependencies": {
+        "com.unity.nuget.newtonsoft-json": "3.0.2",
+        "com.unity.modules.unitywebrequest": "1.0.0",
+        "com.unity.modules.unitywebrequestwww": "1.0.0",
+        "com.unity.modules.jsonserialize": "1.0.0"
+    }
+}
