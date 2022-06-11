@@ -13,11 +13,11 @@
     "samples": [
       {
         "displayName": "Data Containers",
-        "path": "Samples/SamplesData_Containers"
+        "path": "Samples~/SamplesData_Containers"
       },
       {
         "displayName": "Prefabs",
-        "path":  "Samples/SamplesPrefabs"
+        "path":  "Samples~/SamplesPrefabs"
       }
     ]
 }
