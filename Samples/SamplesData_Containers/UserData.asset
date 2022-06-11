@@ -22,7 +22,6 @@ MonoBehaviour:
   - FY
   - FZ
   - FPS
-  - Frame
   saveCSV: 1
   saveJson: 0
   saveLocally: 1

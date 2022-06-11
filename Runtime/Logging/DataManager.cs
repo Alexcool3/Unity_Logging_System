@@ -106,7 +106,7 @@ namespace Logging_System
             float deltaTime = Time.unscaledDeltaTime;
             float fps = 1f / deltaTime;
 
-            userData?.AddRow(Float2String(loggingProperties.currentTime, position.x, position.y, position.z, forward.x, forward.y, forward.z, fps, deltaTime));
+            userData?.AddRow(Float2String(loggingProperties.currentTime, position.x, position.y, position.z, forward.x, forward.y, forward.z, fps));
             userData.saveData.time[index] = loggingProperties.currentTime.ToString().Replace(',', '.');
             userData.saveData.positions[index] = $"{Math.Round(position.x, 2).ToString().Replace(",", ".")};{Math.Round(position.z, 2).ToString().Replace(",", ".")}";
             userData.saveData.views[index] = $"{Math.Round(forward.x, 2).ToString().Replace(",", ".")};{Math.Round(forward.y, 2).ToString().Replace(",", ".")};{Math.Round(forward.z, 2).ToString().Replace(",", ".")}";
