@@ -5,9 +5,19 @@
     "displayName": "Logging System",
     "unity": "2020.3",
     "dependencies": {
-        "com.unity.nuget.newtonsoft-json": "3.0.2",
-        "com.unity.modules.unitywebrequest": "1.0.0",
-        "com.unity.modules.unitywebrequestwww": "1.0.0",
-        "com.unity.modules.jsonserialize": "1.0.0"
-    }
+      "com.unity.nuget.newtonsoft-json": "3.0.2",
+      "com.unity.modules.unitywebrequest": "1.0.0",
+      "com.unity.modules.unitywebrequestwww": "1.0.0",
+      "com.unity.modules.jsonserialize": "1.0.0"
+    },
+    "samples": [
+      {
+        "displayName": "Data Containers",
+        "path": "Samples/SampleData_Containers"
+      },
+      {
+        "displayName": "Prefabs",
+        "path":  "Samples/Prefabs"
+      }
+    ]
 }
