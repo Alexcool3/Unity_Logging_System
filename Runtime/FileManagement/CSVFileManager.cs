@@ -2,7 +2,7 @@ using System.IO;
 using System.Text;
 using System.Collections.Generic;
 
-namespace Logging_System
+namespace Logging_System.FileManagement
 {
     public static class CSVFileManager
     {

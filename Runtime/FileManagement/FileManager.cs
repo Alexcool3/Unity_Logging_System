@@ -2,7 +2,7 @@ using UnityEngine;
 using System.IO;
 using System.Text;
 
-namespace Logging_System
+namespace Logging_System.FileManagement
 {
     public static class FileManager
     {

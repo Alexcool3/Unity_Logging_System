@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System;
 using System.Globalization;
 
-namespace Logging_System
+namespace Logging_System.FileManagement
 {
     public class CSV
     {

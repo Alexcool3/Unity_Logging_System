@@ -1,4 +1,4 @@
-namespace Logging_System
+namespace Logging_System.FileManagement
 {
     public static class JsonFileManager
     {
