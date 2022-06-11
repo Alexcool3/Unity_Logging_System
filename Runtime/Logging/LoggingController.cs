@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.Events;
+using System.Collections;
+using System.Threading.Tasks;
 
 namespace Logging_System
 {
@@ -8,6 +10,8 @@ namespace Logging_System
         [Header("Logging Properties from Data Container")]
         [SerializeField, Tooltip("Data Fields Object")] private LoggingProperties loggingProperties;
         // This class is used to log data individually.
+        private IEnumerator repeat;
+        private bool async;
 
         #region Unity Events
         [Header("Logging Events")]
@@ -24,22 +28,83 @@ namespace Logging_System
                 return;
             }
 
-            OnLoggingStart?.Invoke();
-            loggingProperties.startTime = Time.time + loggingProperties.waitTime;
-
-            Debug.Log($"Logging Started");
-            InvokeRepeating(nameof(LogData), loggingProperties.waitTime, loggingProperties.timeInterval);
+            StartCoroutine(repeat = Repeat(loggingProperties.waitTime, loggingProperties.timeInterval));
         }
 
-        private void LogData()
+        private IEnumerator Repeat(float waitTime, float timeInterval)
         {
-            OnLogging?.Invoke();
-            if (Time.time - loggingProperties.startTime >= loggingProperties.stopTime)
+#if UNITY_EDITOR
+
+            Debug.Log($"Logging Starts in:{waitTime}");
+#endif
+            yield return new WaitForSecondsRealtime(waitTime);
+
+#if UNITY_EDITOR
+            Debug.Log($"Logging Started");
+#endif
+            OnLoggingStart?.Invoke();
+
+            loggingProperties.iterations = (int)Mathf.Round(loggingProperties.stopTime / loggingProperties.timeInterval);
+
+            loggingProperties.currentIteration = 0;
+            loggingProperties.currentTime = 0.0f;
+
+            while (true)
             {
-                CancelInvoke();
-                OnLoggingStop?.Invoke();
-                Debug.Log($"Logging Stopped");
+                OnLogging?.Invoke();
+
+                if (loggingProperties.currentIteration >= loggingProperties.iterations)
+                {
+                    StopCoroutine(repeat);
+                    OnLoggingStop?.Invoke();
+#if UNITY_EDITOR
+                    Debug.Log($"Logging Stopped");
+#endif
+                }
+
+                loggingProperties.currentIteration++;
+                loggingProperties.currentTime += loggingProperties.timeInterval;
+                yield return new WaitForSecondsRealtime(timeInterval);
             }
+        }
+
+        public async Task StartLoggingAsync(bool async = false)
+        {
+            if (async && OnLogging != null) StartCoroutine(repeat = Repeat(loggingProperties.waitTime, loggingProperties.timeInterval));
+            else await Repeat(10);
+        }
+
+        private Task Repeat(int iterations)
+        {
+#if UNITY_EDITOR
+            Debug.Log($"Logging Starts in:{loggingProperties.waitTime}");
+#endif
+            Task.Delay((int)loggingProperties.waitTime * 1000);
+#if UNITY_EDITOR
+            Debug.Log($"Logging Started");
+#endif
+            OnLoggingStart?.Invoke();
+
+            loggingProperties.currentIteration = 0;
+            loggingProperties.currentTime = 0.0f;
+
+            while (loggingProperties.currentIteration < iterations)
+            {
+                OnLogging?.Invoke();
+
+                loggingProperties.currentTime += loggingProperties.timeInterval;
+                loggingProperties.currentIteration++;
+                Task.Delay((int)loggingProperties.timeInterval * 1000);
+            }
+
+            OnLoggingStop?.Invoke();
+#if UNITY_EDITOR
+            Debug.Log($"Logging Stopped");
+#endif
+
+#if UNITY_EDITOR
+            return new Task(null);
+#endif
         }
 
         private void OnDestroy()

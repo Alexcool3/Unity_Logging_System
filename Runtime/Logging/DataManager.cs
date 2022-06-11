@@ -38,6 +38,7 @@ namespace Logging_System
         {
             Singleton = this;
             DontDestroyOnLoad(gameObject);
+            directory ??= System.IO.Directory.GetCurrentDirectory();
         }
 
         // Start is called before the first frame update
@@ -45,11 +46,13 @@ namespace Logging_System
         {
             userData.Init();
             timeStamps = (int)Math.Round(loggingProperties.stopTime / loggingProperties.timeInterval) + 2;
-            Debug.Log(timeStamps);
             userData.SetDataSizes(timeStamps);
             userData.AddRow(userData?.header?.ToArray());
             directory ??= System.IO.Directory.GetCurrentDirectory();
-            Debug.Log(directory);
+#if UNITY_EDITOR
+            Debug.Log($"Time Stamps: {timeStamps}");
+            Debug.Log($"Directory path: { directory}");
+#endif
         }
 
         public void Save()
@@ -66,8 +69,9 @@ namespace Logging_System
                     }
                     catch (Exception e)
                     {
-
-                        Debug.LogError($"The following error occured: {e.Message}"); ;
+#if UNITY_EDITOR
+                        Debug.LogError($"The following error occured: {e.Message}");
+#endif
                     }
                 }
 
@@ -79,16 +83,18 @@ namespace Logging_System
                     }
                     catch (Exception e)
                     {
-
-                        Debug.LogError($"The following error occured: {e.Message}"); ;
+#if UNITY_EDITOR
+                        Debug.LogError($"The following error occured: {e.Message}");
+#endif
                     }
                 }
             }
 
             if (userData.sendToServer)
             {
-                webServer?.SendToServer("localhost:300", new System.Collections.Generic.Dictionary<string, string>() { { "information", userData.jSavegame.ToString() } });
-
+                userData.AddSerializeable(userData);
+                userData.SerializeAll();
+                webServer?.SendToServer("localhost:300", new System.Collections.Generic.Dictionary<string, string>() { { "json", userData.jSavegame.ToString() } });
             }
 
         }
@@ -97,22 +103,14 @@ namespace Logging_System
         {
             Vector3 position = trackObject.position; // Position of the tracked object in world space
             Vector3 forward = trackObject.forward; // Normalized forward facing vector of the tracked object in world space.
-            float time = Time.time;
             float deltaTime = Time.unscaledDeltaTime;
             float fps = 1f / deltaTime;
-            userData?.AddRow(Float2String(time - loggingProperties.startTime, position.x, position.y, position.z, forward.x, forward.y, forward.z, fps, deltaTime));
 
-            userData.saveData.time[index] = Math.Round(time, 2).ToString().Replace(',', '.');
+            userData?.AddRow(Float2String(loggingProperties.currentTime, position.x, position.y, position.z, forward.x, forward.y, forward.z, fps, deltaTime));
+            userData.saveData.time[index] = loggingProperties.currentTime.ToString().Replace(',', '.');
             userData.saveData.positions[index] = $"{Math.Round(position.x, 2).ToString().Replace(",", ".")};{Math.Round(position.z, 2).ToString().Replace(",", ".")}";
             userData.saveData.views[index] = $"{Math.Round(forward.x, 2).ToString().Replace(",", ".")};{Math.Round(forward.y, 2).ToString().Replace(",", ".")};{Math.Round(forward.z, 2).ToString().Replace(",", ".")}";
-            //userData.saveData.fps[index] = Math.Round(fps, 2).ToString().Replace(',', '.');
-            /*
-            participantData.saveData.time += $"{Math.Round(time, 2).ToString().Replace(',', '.')}\n";
-            participantData.saveData.positions += $"{Math.Round(position.x, 2).ToString().Replace(",",".")};{Math.Round(position.z, 2).ToString().Replace(",", ".")}\n";
-            participantData.saveData.views += $"{Math.Round(forward.x, 2).ToString().Replace(",", ".")};{Math.Round(forward.y, 2).ToString().Replace(",", ".")};{Math.Round(forward.z, 2).ToString().Replace(",", ".")}\n";
-            participantData.saveData.fps += $"{Math.Round(fps, 2).ToString().Replace(',', '.')}\n";
-            */
-            Debug.Log($"index:{index++}");
+            userData.saveData.fps[index] = Math.Round(fps, 2).ToString().Replace(',', '.');
         }
 
         private string[] Float2String(params float[] values)
@@ -121,7 +119,6 @@ namespace Logging_System
             for (int i = 0; i < values.Length; i++)
             {
                 tmp[i] = Math.Round(values[i], 2).ToString().Replace(',', '.');
-
             }
             return tmp;
         }
@@ -129,6 +126,8 @@ namespace Logging_System
         [ContextMenu("Load Data")]
         public void LoadData()
         {
+            directory ??= System.IO.Directory.GetCurrentDirectory();
+            userData.directory = directory;
             userData.LoadData();
         }
     }

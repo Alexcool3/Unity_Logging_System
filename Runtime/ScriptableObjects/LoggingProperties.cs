@@ -14,5 +14,8 @@ namespace Logging_System
         [Range(0.1f, 10f), Tooltip("The time between each logging call")]
         public float timeInterval = .1f;
         [HideInInspector] public float startTime; // Time in-game when logging started.
+        [HideInInspector] public float currentTime;
+        [HideInInspector] public float iterations;
+        [HideInInspector] public float currentIteration;
     }
 }
