@@ -48,7 +48,7 @@ namespace Logging_System
         {
             if (data != null)
             {
-                StartCoroutine(WriteToServer(url, data, tables));
+                StartCoroutine(WriteToServer(url, data));
             }
         }
 
@@ -57,31 +57,39 @@ namespace Logging_System
             return lastResponse;
         }
 
-        private IEnumerator WriteToServer(string url, Dictionary<string, string> data, Dictionary<string, string> tables = null)
+        private IEnumerator WriteToServer(string url, Dictionary<string, string> fields, Dictionary<string, byte[]> binaryFields = null)
         {
             WWWForm form = new WWWForm();
-            foreach (KeyValuePair<string, string> item in data)
+            foreach (KeyValuePair<string, string> item in fields)
             {
                 form.AddField(item.Key, item.Value);
             }
 
-            if (tables != null)
+            if (binaryFields != null)
             {
-                foreach (KeyValuePair<string, string> item in tables)
+                foreach (KeyValuePair<string, byte[]> field in binaryFields)
                 {
-                    form.AddField(item.Key, item.Value);
+                    form.AddBinaryData(field.Key, field.Value);
                 }
             }
 
-            UnityWebRequest request = UnityWebRequest.Post(url, form);
-            yield return request.SendWebRequest();
-            if (request.result == UnityWebRequest.Result.ProtocolError || request.result == UnityWebRequest.Result.ConnectionError)
+            using (var request = UnityWebRequest.Post(url, form))
             {
-                Debug.LogError($"Error: Data not send to server");
-            }
-            else
-            {
-                Debug.LogError($"Server response: {request.downloadHandler.text}");
+                yield return request.SendWebRequest();
+                if (request.result != UnityWebRequest.Result.Success)
+                {
+#if UNITY_EDITOR
+                    Debug.LogError(request.error);
+#endif
+                    // Prompt message to the user
+                }
+                else
+                {
+#if UNITY_EDITOR
+                    Debug.Log("Success!");
+#endif              
+                    // Propmpt message to the user.
+                }
             }
         }
 
@@ -93,17 +101,25 @@ namespace Logging_System
                 form.AddField(item.Key, item.Value);
             }
 
-            UnityWebRequest request = UnityWebRequest.Post(url, form);
-            yield return request.SendWebRequest();
-            if (request.result == UnityWebRequest.Result.ProtocolError || request.result == UnityWebRequest.Result.ConnectionError)
+            using (var request = UnityWebRequest.Post(url, form))
             {
+                yield return request.SendWebRequest();
+                if (request.result != UnityWebRequest.Result.Success)
+                {
 
-                Debug.LogError("Error: Data not send to server");
-            }
-            else
-            {
-                lastResponse = request.downloadHandler.text;
-                Debug.LogError($"Server response: {lastResponse}");
+#if UNITY_EDITOR
+                    Debug.LogError($"Error:{request.error}");
+#endif  
+                    // Prompt message to the user
+                }
+                else
+                {
+                    lastResponse = request.downloadHandler.text;
+#if UNITY_EDITOR
+                    Debug.Log($"Response:{lastResponse}");
+#endif              
+                    // Propmpt message to the user.
+                }
             }
         }
     }
